@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.ai.client.generativeai.GenerativeModel
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,20 +18,27 @@ class MainActivity : AppCompatActivity() {
 
         summaryTextView = findViewById(R.id.summaryTextView)
 
-        // Check if the app was opened via the "Share" button
         if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            handleSharedReel(intent)
+            val reelUrl = intent.getStringExtra(Intent.EXTRA_TEXT)
+            reelUrl?.let { summarizeReel(it) }
         }
     }
 
-    private fun handleSharedReel(intent: Intent) {
-        val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
-        if (sharedText != null) {
-            // This is the Instagram link! 
-            summaryTextView.text = "Fetching summary for: $sharedText..."
-            
-            // NEXT STEP: Call your Gemini API function here
-            // summarizeWithGemini(sharedText)
+    private fun summarizeReel(url: String) {
+        summaryTextView.text = "Gemini is watching the reel..."
+        
+        val generativeModel = GenerativeModel(
+            modelName = "gemini-1.5-flash",
+            apiKey = BuildConfig.GEMINI_KEY
+        )
+
+        MainScope().launch {
+            try {
+                val response = generativeModel.generateContent("Summarize this Instagram reel link: $url")
+                summaryTextView.text = response.text
+            } catch (e: Exception) {
+                summaryTextView.text = "Error: ${e.message}"
+            }
         }
     }
 }
