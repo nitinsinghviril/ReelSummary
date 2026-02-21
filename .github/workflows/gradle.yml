@@ -14,23 +14,22 @@ android {
         versionCode 1
         versionName "1.0"
 
-        // This allows the app to read your API Key safely
-        buildConfigField "String", "GEMINI_KEY", "\"${project.findProperty('GEMINI_API_KEY') ?: ""}\""
+        // This line pulls the key from your Codespace Environment Variables
+        // System.getenv() looks for the secret you added to GitHub
+        buildConfigField "String", "GEMINI_KEY", "\"${System.getenv("GEMINI_API_KEY") ?: ""}\""
     }
-
-    // This specifically fixes the FAILED: 25.0.1 error
-    buildToolsVersion "34.0.0" 
 
     buildFeatures {
+        // Enable BuildConfig so we can use the key in Kotlin
         buildConfig true
     }
+
+    buildToolsVersion "34.0.0" 
 }
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
-    
-    // The library that talks to Gemini
     implementation("com.google.ai.client.generativeai:generativeai:0.4.0")
 }
